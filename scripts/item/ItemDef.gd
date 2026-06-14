@@ -5,6 +5,7 @@ extends Resource
 @export var display_name: String = ""
 @export var size_cells: Vector2i = Vector2i.ONE
 @export var sprite_path: String = ""
+@export var sprite_offset: Vector2 = Vector2.ZERO
 @export var allowed_surface_types: Array[String] = []
 @export var forbidden_surface_types: Array[String] = []
 @export var tags: Array[String] = []
@@ -22,10 +23,14 @@ func _init(
 		p_tags: Array = [],
 		p_can_rotate: bool = true,
 		p_required: bool = true,
-		p_color: Color = Color.WHITE) -> void:
+		p_color: Color = Color.WHITE,
+		p_sprite_path: String = "",
+		p_sprite_offset: Vector2 = Vector2.ZERO) -> void:
 	id = p_id
 	display_name = p_display_name
 	size_cells = p_size_cells
+	sprite_path = p_sprite_path
+	sprite_offset = p_sprite_offset
 	allowed_surface_types.assign(p_allowed_surface_types)
 	forbidden_surface_types.assign(p_forbidden_surface_types)
 	tags.assign(p_tags)

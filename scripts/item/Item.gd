@@ -18,6 +18,7 @@ var previous_surface_id := ""
 var previous_rotation := 0
 var preview_result := PlacementResult.new(false, PlacementResult.NO_SURFACE)
 var visual_state := "idle"
+var item_texture: Texture2D
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
@@ -33,6 +34,7 @@ func configure(p_item_def: ItemDef, p_state: ItemState, p_level_manager: LevelMa
 	name = item_def.id
 	position = state.position
 	rotation_degrees = state.rotation_degrees
+	item_texture = _load_texture(item_def.sprite_path)
 	_update_collision()
 	queue_redraw()
 
@@ -131,7 +133,10 @@ func _draw() -> void:
 	var size := Vector2i(int(rect.size.x), int(rect.size.y))
 	if not is_dragging:
 		draw_rect(Rect2(2, size.y - 2, max(4, size.x - 2), 3), Color(0.05, 0.04, 0.04, 0.22))
-	_draw_item_art(item_def.id, size)
+	if item_texture != null:
+		draw_texture(item_texture, item_def.sprite_offset)
+	else:
+		_draw_item_art(item_def.id, size)
 	if visual_state == "valid":
 		draw_rect(rect, Color(0.28, 1.0, 0.45, 0.18))
 		draw_rect(rect.grow(1), Color(0.18, 0.95, 0.35), false, 2.0)
@@ -329,3 +334,9 @@ func _draw_generic_item(size: Vector2i) -> void:
 	_r(1, 1, size.x - 2, size.y - 2, Color(0.08, 0.07, 0.06))
 	_r(2, 2, size.x - 4, size.y - 4, item_def.color)
 	_r(4, 4, max(2, size.x - 10), 2, item_def.color.lightened(0.25))
+
+func _load_texture(path: String) -> Texture2D:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	var resource: Resource = load(path)
+	return resource as Texture2D

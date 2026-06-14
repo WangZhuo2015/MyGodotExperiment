@@ -8,8 +8,12 @@ extends Node2D
 @export var allowed_tags: Array[String] = []
 @export var forbidden_tags: Array[String] = []
 @export var surface_color: Color = Color(0.35, 0.38, 0.40)
+@export var visual_sprite_path: String = ""
+@export var visual_offset: Vector2 = Vector2.ZERO
+@export var grid_origin_px: Vector2 = Vector2.ZERO
 
 var occupancy := OccupancyGrid.new()
+var visual_texture: Texture2D
 
 func _ready() -> void:
 	reset_occupancy()
@@ -25,6 +29,10 @@ func configure(def: SurfaceDef) -> void:
 	allowed_tags = def.allowed_tags
 	forbidden_tags = def.forbidden_tags
 	surface_color = def.color
+	visual_sprite_path = def.visual_sprite_path
+	visual_offset = def.visual_offset
+	grid_origin_px = def.grid_origin_px
+	visual_texture = _load_texture(visual_sprite_path)
 	reset_occupancy()
 	queue_redraw()
 
@@ -32,11 +40,11 @@ func reset_occupancy() -> void:
 	occupancy = OccupancyGrid.new(grid_size_cells)
 
 func world_to_grid(pos: Vector2) -> Vector2i:
-	var local := to_local(pos)
+	var local := to_local(pos) - grid_origin_px
 	return Vector2i(floori(local.x / grid_size_px), floori(local.y / grid_size_px))
 
 func grid_to_world(cell: Vector2i) -> Vector2:
-	return to_global(Vector2(cell * grid_size_px))
+	return to_global(grid_origin_px + Vector2(cell * grid_size_px))
 
 func can_accept_item(item_def: ItemDef) -> bool:
 	for tag in item_def.tags:
@@ -66,10 +74,14 @@ func get_candidate_snap_position(_item, world_pos: Vector2) -> Vector2:
 	return grid_to_world(world_to_grid(world_pos))
 
 func bounds_rect() -> Rect2:
-	return Rect2(global_position, Vector2(grid_size_cells * grid_size_px))
+	return Rect2(to_global(grid_origin_px), Vector2(grid_size_cells * grid_size_px))
 
 func _draw() -> void:
 	var size := Vector2(grid_size_cells * grid_size_px)
+	if visual_texture != null:
+		draw_texture(visual_texture, visual_offset)
+		_draw_surface_hint(Rect2(grid_origin_px, size))
+		return
 	match surface_type:
 		"desk":
 			_draw_desk(size)
@@ -92,7 +104,7 @@ func _draw_desk(size: Vector2) -> void:
 	draw_rect(Rect2(size.x - 14, 10, 10, size.y + 18), Color(0.37, 0.22, 0.14))
 	draw_rect(Rect2(6, 3, size.x - 12, 3), Color(0.75, 0.53, 0.32))
 	draw_rect(Rect2(0, 0, size.x, 10), Color(0.18, 0.11, 0.08), false, 2.0)
-	_draw_surface_hint(size)
+	_draw_surface_hint(Rect2(Vector2.ZERO, size))
 
 func _draw_shelf(size: Vector2) -> void:
 	draw_rect(Rect2(-5, size.y - 8, size.x + 10, 8), Color(0.37, 0.22, 0.14))
@@ -101,7 +113,7 @@ func _draw_shelf(size: Vector2) -> void:
 	draw_rect(Rect2(16, size.y - 27, 8, 14), Color(0.76, 0.23, 0.20))
 	draw_rect(Rect2(28, size.y - 29, 16, 16), Color(0.38, 0.63, 0.34))
 	draw_rect(Rect2(size.x - 28, size.y - 28, 18, 16), Color(0.82, 0.71, 0.43))
-	_draw_surface_hint(size)
+	_draw_surface_hint(Rect2(Vector2.ZERO, size))
 
 func _draw_bed(size: Vector2) -> void:
 	draw_rect(Rect2(-5, -7, size.x + 10, size.y + 12), Color(0.34, 0.21, 0.16))
@@ -110,13 +122,13 @@ func _draw_bed(size: Vector2) -> void:
 	draw_rect(Rect2(48, 5, size.x - 56, size.y - 12), Color(0.36, 0.55, 0.74))
 	draw_rect(Rect2(55, 12, size.x - 70, 4), Color(0.62, 0.78, 0.90, 0.65))
 	draw_rect(Rect2(0, 0, size.x, size.y), Color(0.13, 0.10, 0.10), false, 2.0)
-	_draw_surface_hint(size)
+	_draw_surface_hint(Rect2(Vector2.ZERO, size))
 
 func _draw_floor_zone(size: Vector2) -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.72, 0.55, 0.38, 0.10))
 	for x in range(0, int(size.x), grid_size_px * 3):
 		draw_line(Vector2(x, 2), Vector2(x + 18, size.y - 2), Color(0.27, 0.18, 0.12, 0.18), 1.0)
-	_draw_surface_hint(size)
+	_draw_surface_hint(Rect2(Vector2.ZERO, size))
 
 func _draw_wall_hook(size: Vector2) -> void:
 	draw_rect(Rect2(0, 0, size.x, size.y), Color(0.80, 0.70, 0.55, 0.26))
@@ -126,7 +138,13 @@ func _draw_wall_hook(size: Vector2) -> void:
 	draw_line(center + Vector2(0, 6), center + Vector2(-8, 13), Color(0.23, 0.17, 0.14), 3.0)
 	draw_line(center + Vector2(0, 6), center + Vector2(8, 13), Color(0.23, 0.17, 0.14), 3.0)
 	draw_rect(Rect2(center.x - 3, center.y - 15, 6, 6), Color(0.83, 0.68, 0.34))
-	_draw_surface_hint(size)
+	_draw_surface_hint(Rect2(Vector2.ZERO, size))
 
-func _draw_surface_hint(size: Vector2) -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color(1.0, 0.95, 0.72, 0.10), false, 1.0)
+func _draw_surface_hint(rect: Rect2) -> void:
+	draw_rect(rect, Color(1.0, 0.95, 0.72, 0.10), false, 1.0)
+
+func _load_texture(path: String) -> Texture2D:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	var resource: Resource = load(path)
+	return resource as Texture2D

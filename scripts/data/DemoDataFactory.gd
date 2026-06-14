@@ -11,11 +11,11 @@ static func create_level() -> LevelDef:
 
 static func _create_surfaces() -> Array[SurfaceDef]:
 	return [
-		SurfaceDef.new("desk_01", "Desk", "desk", Vector2(252, 130), Vector2i(9, 3), 12, Color(0.55, 0.41, 0.28)),
-		SurfaceDef.new("shelf_01", "Shelf", "shelf", Vector2(268, 58), Vector2i(8, 2), 12, Color(0.48, 0.34, 0.22)),
-		SurfaceDef.new("bed_01", "Bed", "bed", Vector2(48, 136), Vector2i(10, 5), 12, Color(0.45, 0.62, 0.78)),
-		SurfaceDef.new("floor_01", "Floor", "floor", Vector2(24, 210), Vector2i(36, 4), 12, Color(0.38, 0.32, 0.26)),
-		SurfaceDef.new("wall_hook_01", "Wall Hook", "wall_hook", Vector2(152, 54), Vector2i(4, 4), 12, Color(0.62, 0.58, 0.48)),
+		SurfaceDef.new("desk_01", "Desk", "desk", Vector2(252, 130), Vector2i(9, 3), 12, Color(0.55, 0.41, 0.28), "res://art/placeholder/aseprite_style/room/desk.png", Vector2(-12, -28)),
+		SurfaceDef.new("shelf_01", "Shelf", "shelf", Vector2(268, 58), Vector2i(8, 2), 12, Color(0.48, 0.34, 0.22), "res://art/placeholder/aseprite_style/room/shelf.png", Vector2(-10, -18)),
+		SurfaceDef.new("bed_01", "Bed", "bed", Vector2(48, 136), Vector2i(10, 5), 12, Color(0.45, 0.62, 0.78), "res://art/placeholder/aseprite_style/room/bed.png", Vector2(-6, -12)),
+		SurfaceDef.new("floor_01", "Floor", "floor", Vector2(24, 210), Vector2i(36, 4), 12, Color(0.38, 0.32, 0.26), "res://art/placeholder/aseprite_style/room/floor_soft_zone.png", Vector2(0, -4)),
+		SurfaceDef.new("wall_hook_01", "Wall Hook", "wall_hook", Vector2(152, 54), Vector2i(4, 4), 12, Color(0.62, 0.58, 0.48), "res://art/placeholder/aseprite_style/room/wall_hook.png", Vector2(0, -6)),
 	]
 
 static func _create_items() -> Array[ItemDef]:
@@ -43,4 +43,7 @@ static func _create_items() -> Array[ItemDef]:
 	]
 
 static func _item(id: String, display_name: String, size: Vector2i, allowed: Array, forbidden: Array, tags: Array, can_rotate: bool, required: bool, color: Color) -> ItemDef:
-	return ItemDef.new(id, display_name, size, allowed, forbidden, tags, can_rotate, required, color)
+	return ItemDef.new(id, display_name, size, allowed, forbidden, tags, can_rotate, required, color, _item_sprite_path(id))
+
+static func _item_sprite_path(id: String) -> String:
+	return "res://art/placeholder/aseprite_style/item/%s.png" % id

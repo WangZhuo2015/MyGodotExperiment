@@ -38,6 +38,12 @@ Items start in the open cardboard box with `ItemState.is_in_box = true`. Picking
 
 The return value is always a `PlacementResult` with a boolean, reason string, snapped position, and occupied cells.
 
+## 2.5D Visual Layer
+
+The logic grid and the visual art are deliberately separate. `PlacementSurface.gd` can draw a 2.5D PNG via `SurfaceDef.visual_sprite_path`, offset it with `visual_offset`, and still validate placement against a deterministic cell grid. `grid_origin_px` marks where the usable top surface begins inside a larger sprite, so a desk can have a front face and legs without changing item placement rules.
+
+Items load `ItemDef.sprite_path` when a PNG exists, with procedural pixel drawing as fallback. The item collision and placement footprint still come from `size_cells`, not sprite alpha. `Room.gd` and `Box.gd` follow the same pattern: use PNG assets when available, otherwise draw safe placeholders.
+
 ## Save/Load Pipeline
 
 `SaveManager.gd` serializes `ItemState` objects into `user://save_demo.json` with version `1`, level id, item states, and completion state. A migration hook exists for future save versions.

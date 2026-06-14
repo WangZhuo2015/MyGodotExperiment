@@ -76,6 +76,16 @@ Current surface ids and types:
 - `floor_01` - floor
 - `wall_hook_01` - wall hook
 
+The framework has already been adapted for 2.5D assets:
+
+- `ItemDef.sprite_path` and `ItemDef.sprite_offset` exist.
+- `SurfaceDef.visual_sprite_path`, `SurfaceDef.visual_offset`, and `SurfaceDef.grid_origin_px` exist.
+- `Item.gd` loads PNG item sprites when present and falls back to procedural drawing.
+- `PlacementSurface.gd` loads PNG furniture/surface sprites when present and falls back to procedural drawing.
+- `Room.gd` loads `bedroom_background.png` when present and falls back to procedural drawing.
+- `Box.gd` loads `open_cardboard_box.png` when present and falls back to procedural drawing.
+- `DemoDataFactory.gd` already points each item/surface to the expected PNG paths.
+
 ## Visual Direction
 
 Make direction A: cozy bedroom, but in a 2.5D orthographic/oblique pixel-art view.
@@ -248,17 +258,17 @@ Each furniture asset must have 2.5D construction:
 
 ### Task 3: Wire Item Sprites Into ItemDef
 
-Modify:
+Verify:
 
 `scripts/data/DemoDataFactory.gd`
 
-Set each `ItemDef.sprite_path` to the matching PNG path, for example:
+Each `ItemDef.sprite_path` should already point to the matching PNG path, for example:
 
 ```gdscript
-item.sprite_path = "res://art/placeholder/aseprite_style/item/book_blue.png"
+"res://art/placeholder/aseprite_style/item/book_blue.png"
 ```
 
-Keep the current item ids, sizes, allowed surfaces, tags, and required flags unchanged unless a sprite footprint truly requires a small adjustment.
+Keep the current item ids, sizes, allowed surfaces, tags, and required flags unchanged unless a sprite footprint truly requires a small adjustment. If an item PNG needs transparent padding, prefer setting `sprite_offset` instead of changing `size_cells`.
 
 ### Task 4: Update Item Rendering
 
@@ -266,7 +276,7 @@ Modify:
 
 `scripts/item/Item.gd`
 
-Preferred behavior:
+Expected behavior already exists; verify and improve only if necessary:
 
 - If `item_def.sprite_path` is non-empty and loadable, render a `Sprite2D` or draw a loaded texture.
 - Keep procedural drawing as fallback only.
@@ -292,7 +302,7 @@ Preferred behavior:
 - Keep existing procedural drawing as fallback if PNGs are missing.
 - Keep placement surfaces aligned with their current world positions and grid sizes.
 - The visual sprite may be larger than the logical placement grid. Align the logical grid to the top usable surface, not to the whole sprite bounds.
-- If needed, add explicit visual offsets per surface in `PlacementSurface.gd`, but keep the validator using the existing grid cells.
+- Use `SurfaceDef.visual_offset` and `SurfaceDef.grid_origin_px` if alignment needs tuning, but keep the validator using the existing grid cells.
 
 ### Task 6: Import Settings
 

@@ -1,7 +1,17 @@
 class_name Room
 extends Node2D
 
+@export var background_path: String = "res://art/placeholder/aseprite_style/room/bedroom_background.png"
+
+var background_texture: Texture2D
+
+func _ready() -> void:
+	background_texture = _load_texture(background_path)
+
 func _draw() -> void:
+	if background_texture != null:
+		draw_texture(background_texture, Vector2.ZERO)
+		return
 	_draw_wall()
 	_draw_floor()
 	_draw_window()
@@ -44,3 +54,9 @@ func _draw_wall_details() -> void:
 	draw_rect(Rect2(402, 38, 36, 30), Color(0.45, 0.31, 0.25))
 	draw_rect(Rect2(406, 42, 28, 22), Color(0.86, 0.76, 0.54))
 	draw_line(Vector2(412, 48), Vector2(428, 58), Color(0.33, 0.43, 0.34), 2.0)
+
+func _load_texture(path: String) -> Texture2D:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	var resource: Resource = load(path)
+	return resource as Texture2D
